@@ -11,12 +11,12 @@
 ```
 docker build -t producer -f Dockerfile_producer.yml .
 ```
-- Then you can run the provider with.
+- Run the provider with.
 ```
 docker run --network="host" --name theProvider producer
 ```
 - If you want to change the server, edit the `application.conf` in producer.
-```
+```scala
 //application.conf
 
 producer{
@@ -31,7 +31,7 @@ producer{
 ```
 docker build -t consumer -f Dockerfile_consumer.yml .
 ```
-- Then you can run the consumer with.
+- Run the consumer with.
 ```
 docker run --network="host" --name theConsumer consumer
 ```
