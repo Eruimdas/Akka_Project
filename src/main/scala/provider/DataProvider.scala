@@ -15,7 +15,6 @@ import model.{InitialResponse, Message, PageResponse}
 
 import scala.collection.immutable._
 import scala.concurrent.ExecutionContextExecutor
-import scala.io.StdIn
 
 object DataProvider {
 
@@ -62,10 +61,5 @@ object DataProvider {
 
     // `route` will be implicitly converted to `Flow` using `RouteResult.route2HandlerFlow`
     val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
-    system.log.info("\nThe server is online at http://localhost:8080/ \nPress RETURN to stop the server.")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
   }
 }
