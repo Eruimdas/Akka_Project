@@ -16,15 +16,14 @@ consumer {
 }
 ```
 
-### How to build docker images
+### Docker images
 
 - Use `sbt assembly` to create producer.jar and consumer.jar
 - Then build docker images with the provided Dockerfiles with:
-```scala
+```
 docker build -t provider -f Dockerfile_provider.yml .
 ```
-
-- Repeat the step for producer.
+- Repeat the step for consumer.
 
 ### Running the docker images
 
