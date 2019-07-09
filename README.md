@@ -4,7 +4,7 @@
 
 First configure the parameters.
 
-'''
+'''scala
 kafka {
   topic = $topicName
 }
@@ -20,7 +20,7 @@ consumer {
 
 - Use 'sbt assembly' to create producer.jar and consumer.jar
 - Then build docker images with the provided Dockerfiles with:
-'''
+'''scala
 docker build -t provider -f Dockerfile_provider.yml .
 '''
 
