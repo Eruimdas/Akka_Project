@@ -1,4 +1,4 @@
-package data
+package provider
 
 import java.util.Random
 
@@ -34,7 +34,7 @@ object DataProvider {
     val myMessageList1 : List[Message] = List(Message("hasan1"),Message("deneme1"),Message("yasarcan1"))
     val myMessageList2 : List[Message] = List(Message("hasan"),Message("deneme"),Message("yasarcan"))
     val randomizer = new Random()
-    val pageNumber =  randomizer.nextInt(500) + 1
+    val pageNumber =  50 //randomizer.nextInt(500) + 1
     system.log.info("randomized value is : " + pageNumber)
 
     val route:Route =
