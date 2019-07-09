@@ -15,9 +15,14 @@ docker build -t producer -f Dockerfile_producer.yml .
 ```
 docker run --network="host" --name theProvider producer
 ```
-- If you want to change the url you're providing data, edit localhost and 8080 in DataProvider line 63.
+- If you want to change the server, edit the `application.conf` in producer.
 ```
-val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
+//application.conf
+
+producer{
+  port = $port // ex: 8080
+  host = $host // ex: "localhost"
+}
 ```
 
 ### Consumer
