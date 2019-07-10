@@ -9,47 +9,22 @@
 - Use `sbt assembly` to create producer.jar in the directory.
 - Then build docker image with:
 ```
-docker build -t producer -f Dockerfile_producer.yml .
+docker build -t producer .
 ```
 - Run the provider with.
 ```
 docker run --network="host" --name theProvider producer
 ```
-- If you want to change the server, edit the `application.conf` in producer.
-```scala
-//application.conf
-
-producer{
-  port = $port // ex: 8080
-  host = $host // ex: "localhost"
-}
-```
+- If you want to change the server, add the `-e PORT_TO_HOST = $newPort` and `-e HOST_NAME = $newHost` to docker run command.
 
 ### Consumer
 - Use `sbt assembly` to create producer.jar in the directory.
 - Then build docker image with:
 ```
-docker build -t consumer -f Dockerfile_consumer.yml .
+docker build -t consumer .
 ```
 - Run the consumer with.
 ```
 docker run --network="host" --name theConsumer consumer
 ```
-- For any changes in the server, edit `application.conf` file.
-
-```scala
-// application.conf
-
-kafka {
-  topic = $topic // ex: "test"
-}
-
-consumer {
-  //defaults
-  date = $date // ex: "20190627"
-  link = $link // ex: "http://localhost:8080/fetcher"
-}
-
-akka.persistence.journal.leveldb.dir = "target/journal"
-akka.persistence.journal.plugin = "akka.persistence.journal.leveldb"
-```
+- For any changes in the server, add `-e DATE_FOR_LINK = $newDate` and `-e DIR_FOR_PERSISTENCE = $newDirectory` to docker run command.
