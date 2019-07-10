@@ -84,10 +84,11 @@ class MasterActor extends PersistentActor with ActorLogging {
       (1 to pageNumber).foreach(pageNum => {
         if(!processedPages.toArray.contains(pageNum)) {
           workerActors ! HistoryFetcher(link, pageNum, date, historyPages)
-          Thread.sleep(100)
-          if (math.random() < 0.025) {
+          /*Thread.sleep(10)
+          if (math.random() < 0.002) {
             throw new Exception("The system has broken by hand.")
           }
+           */
         }
       }
       )
@@ -143,7 +144,7 @@ class MasterActor extends PersistentActor with ActorLogging {
     log.info("The master actor has been restarted.")
     val myDate : String = myConfig.getString("consumer.date")
     val myLink : String = myConfig.getString("consumer.link")
-    self ! DateFetcher(myDate,myLink)
+    self ! DateFetcher(myDate.substring(2,myDate.length()),myLink)
     super.postRestart(reason)
   }
 }

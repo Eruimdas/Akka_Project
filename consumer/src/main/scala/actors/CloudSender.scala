@@ -14,7 +14,7 @@ class CloudSender extends Actor with ActorLogging{
 
   val producer = new KafkaProducer[String, String](KafkaProducerConfigs().properties)
   val topic: String = ConfigFactory.load("application.conf").getString("kafka.topic")
-  context.setReceiveTimeout(10000 milliseconds)
+  context.setReceiveTimeout(50000 milliseconds)
 
   override def receive: Receive = {
 

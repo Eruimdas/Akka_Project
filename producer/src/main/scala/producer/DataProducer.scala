@@ -22,7 +22,7 @@ object DataProducer {
   def main(args: Array[String]) {
 
     val myConfig: Config = ConfigFactory.load("application.conf")
-    val myPort : Int = myConfig.getString("producer.port").toInt
+    val myPort : String = myConfig.getString("producer.port")
     val myHost : String = myConfig.getString("producer.host")
 
     implicit val system: ActorSystem = ActorSystem()
@@ -38,7 +38,7 @@ object DataProducer {
     val myMessageList1 : List[Message] = List(Message("hasan1"),Message("deneme1"),Message("yasarcan1"))
     val myMessageList2 : List[Message] = List(Message("hasan"),Message("deneme"),Message("yasarcan"))
     val randomizer = new Random()
-    val pageNumber =  randomizer.nextInt(500) + 1
+    val pageNumber =  200 //randomizer.nextInt(500) + 1
     system.log.info("randomized value is : " + pageNumber)
 
     val route:Route =
@@ -65,7 +65,7 @@ object DataProducer {
     val routes: Route = route ~ healthRoute
 
     // `route` will be implicitly converted to `Flow` using `RouteResult.route2HandlerFlow`
-    val bindingFuture = Http().bindAndHandle(routes, myHost, myPort)
+    val bindingFuture = Http().bindAndHandle(routes, myHost.substring(2,myHost.length()), myPort.substring(2,myPort.length()).toInt)
 
   }
 }

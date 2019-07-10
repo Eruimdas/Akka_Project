@@ -37,7 +37,8 @@ class WorkerActor extends Actor with ActorLogging{
           .map(myVal => cloudSender ! myVal)
           .recover {
             case error: Throwable => {
-              log.error(s"There's an error while sending the request.  $error")
+              log.error(s"There's an error while sending the request: $pageNum")
+              Thread.sleep(50)
               self ! dataList
             }
           }

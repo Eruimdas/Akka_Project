@@ -15,7 +15,7 @@ object DataConsumer {
   val myDate : String = myConfig.getString("consumer.date")
   val myLink : String = myConfig.getString("consumer.link")
 
-  val myData : DateFetcher = DateFetcher(myDate,myLink)
+  val myData : DateFetcher = DateFetcher(myDate.substring(2,myDate.length()),myLink)
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val mat : Materializer = ActorMaterializer()
