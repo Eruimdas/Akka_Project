@@ -18,15 +18,15 @@ class CloudSender extends Actor with ActorLogging{
 
   override def receive: Receive = {
 
-    case received: PageResponse => {
+    case receivedPageResponse: PageResponse => {
 
-      log.debug("Message has been received cloud: " + received.pageNumber)
+      log.debug("Message has been received cloud: " + receivedPageResponse.pageNumber)
 
-      received.messageList.map(_.toString()).map { message =>
+      receivedPageResponse.messageList.map(_.toString()).map { message =>
           new ProducerRecord[String, String](topic, message)}
         .map(myRecord => producer.send(myRecord))
 
-      log.info("CLOUD SENDER HAS SENT THE VALUES TO THE CLOUD.!!!  " + received.pageNumber)
+      log.info("Cloud sender has sent the values to the cloud. " + receivedPageResponse.pageNumber)
       log.debug("The sender has finished.")
 
       producer.close()
@@ -42,11 +42,12 @@ class CloudSender extends Actor with ActorLogging{
     }
 
     case receivedMessage : MessageList => {
-      receivedMessage.messageList.map(_.toString()).map { message =>
-          new ProducerRecord[String, String](topic, message)}
-        .map(myRecord => producer.send(myRecord))
+      receivedMessage.messageList.map { message =>
+        val putRecord = new ProducerRecord[String, String](topic, message.toString())
+        producer.send(putRecord)
+      }
 
-      log.info("CLOUD SENDER HAS SENT THE VALUES TO THE CLOUD.!!!  " + "0")
+      log.info("Cloud sender has sent the values to the cloud. " + "0")
       log.debug("The sender has finished.")
 
       producer.close()

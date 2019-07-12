@@ -9,7 +9,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.persistence.PersistentActor
 import akka.routing.RoundRobinPool
 
-import consumer.DataConsumer.{executionContext, mat, myConfig, system}
+import consumer.DataConsumer.{executionContext, mat, consumerConfig, system}
 import model.Formatters._
 import model._
 
@@ -25,32 +25,32 @@ class MasterActor extends PersistentActor with ActorLogging {
 
   override def receiveCommand: Receive = {
 
-    case received : DateFetcher => {
+    case receivedDate : DateFetcher => {
 
-      val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = received.link + "?date=" + received.date))
+      val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = receivedDate.link + "?date=" + receivedDate.date))
 
-      log.info("A single http request has been sent to the server.")
+      log.debug("A single http request has been sent to the server.")
       log.info("The client is running.")
 
       responseFuture
         .onComplete {
-          case Success(HttpResponse(StatusCodes.OK, _, entity, _)) => {
-            log.info("The server connection has been made succesfully, and the data has been fetched.")
-            for{
-            pageNum <- Unmarshal(entity).to[InitialResponse].map(num => num.pageNumber)
-            initialMessageList <- Unmarshal(entity).to[InitialResponse].map(x => x.messageList)
-            } yield {
-              log.debug("The page number is : " + pageNum)
-              self !  HistoryFetcher(received.link+"?date=",pageNum,received.date,processedPages)
-              Thread.sleep(50)
-              if(!processedPages.toArray.contains(0)) {
-                context.child("workerActors").get ! MessageList(initialMessageList)
+          case Success(HttpResponse(status, _, entity, _)) => {
+            if (status == StatusCodes.OK) {
+              log.info("The server connection has been made succesfully, and the data has been fetched.")
+              for {
+                pageNum <- Unmarshal(entity).to[InitialResponse].map(num => num.pageNumber)
+                initialMessageList <- Unmarshal(entity).to[InitialResponse].map(x => x.messageList)
+              } yield {
+                log.debug("The page number is : " + pageNum)
+                self ! HistoryFetcher(receivedDate.link + "?date=", pageNum, receivedDate.date, processedPages)
+                Thread.sleep(50)
+                if (!processedPages.toArray.contains(0)) {
+                  context.child("workerActors").get ! MessageList(initialMessageList)
+                }
               }
             }
 
-          }
-          case Success(HttpResponse(status, _, _, _)) => {
-            if (status == StatusCodes.BadRequest)
+            else if (status == StatusCodes.BadRequest)
               system.log.error("A BadRequest Error has been occured please check the server.")
 
             else if (status == StatusCodes.BadGateway)
@@ -84,11 +84,6 @@ class MasterActor extends PersistentActor with ActorLogging {
       (1 to pageNumber).foreach(pageNum => {
         if(!processedPages.toArray.contains(pageNum)) {
           workerActors ! HistoryFetcher(link, pageNum, date, historyPages)
-          /*Thread.sleep(10)
-          if (math.random() < 0.002) {
-            throw new Exception("The system has broken by hand.")
-          }
-           */
         }
       }
       )
@@ -142,8 +137,8 @@ class MasterActor extends PersistentActor with ActorLogging {
   override def postRestart(reason: Throwable): Unit = {
     Thread.sleep(500)
     log.info("The master actor has been restarted.")
-    val myDate : String = myConfig.getString("consumer.date")
-    val myLink : String = myConfig.getString("consumer.link")
+    val myDate : String = consumerConfig.getString("consumer.date")
+    val myLink : String = consumerConfig.getString("consumer.link")
     self ! DateFetcher(myDate.substring(2,myDate.length()),myLink)
     super.postRestart(reason)
   }

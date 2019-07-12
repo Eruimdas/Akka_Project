@@ -11,9 +11,9 @@ import scala.concurrent.ExecutionContextExecutor
 
 object DataConsumer {
 
-  val myConfig: Config = ConfigFactory.load("application.conf")
-  val myDate : String = myConfig.getString("consumer.date")
-  val myLink : String = myConfig.getString("consumer.link")
+  val consumerConfig : Config = ConfigFactory.load()
+  val myDate : String = consumerConfig.getString("consumer.date")
+  val myLink : String = consumerConfig.getString("consumer.link")
 
   val myData : DateFetcher = DateFetcher(myDate.substring(2,myDate.length()),myLink)
 

@@ -24,22 +24,22 @@ class WorkerActor extends Actor with ActorLogging{
 
   def receive: Receive = {
 
-    case dataList: HistoryFetcher => {
+    case receivedHistory: HistoryFetcher => {
 
-      pageNum = dataList.pageNumber
+      pageNum = receivedHistory.pageNumber
       //log.info("Message has been received worker: " + pageNum)
-      val myPageList = dataList.pageList.toArray
+      val myPageList = receivedHistory.pageList.toArray
 
       if(!myPageList.contains(pageNum)) {
         log.info(s"$pageNum is going to be processed.")
-        Http().singleRequest(HttpRequest(uri = dataList.link + dataList.date + "&page=" + dataList.pageNumber))
+        Http().singleRequest(HttpRequest(uri = receivedHistory.link + receivedHistory.date + "&page=" + receivedHistory.pageNumber))
           .flatMap(httpRes => Unmarshal(httpRes.entity).to[PageResponse])
           .map(myVal => cloudSender ! myVal)
           .recover {
             case error: Throwable => {
               log.error(s"There's an error while sending the request: $pageNum")
               Thread.sleep(50)
-              self ! dataList
+              self ! receivedHistory
             }
           }
       }

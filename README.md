@@ -9,11 +9,11 @@
 - Use `sbt assembly` to create producer.jar in the directory.
 - Then build docker image with:
 ```
-docker build -t producer .
+docker build -t producer:$tag .
 ```
 - Run the provider with.
 ```
-docker run --network="host" --name theProvider producer
+docker run --network="host" --name theProvider producer:$tag
 ```
 - If you want to change the server, add the `-e PORT_TO_HOST = $newPort` and `-e HOST_NAME = $newHost` to docker run command.
 
@@ -21,10 +21,10 @@ docker run --network="host" --name theProvider producer
 - Use `sbt assembly` to create producer.jar in the directory.
 - Then build docker image with:
 ```
-docker build -t consumer .
+docker build -t consumer:$tag .
 ```
 - Run the consumer with.
 ```
-docker run --network="host" --name theConsumer consumer
+docker run --network="host" --name theConsumer consumer:$tag
 ```
 - For any changes in the server, add `-e DATE_FOR_LINK = $newDate` and `-e DIR_FOR_PERSISTENCE = $newDirectory` to docker run command.
