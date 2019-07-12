@@ -29,7 +29,7 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
 
       val responseFuture: Future[HttpResponse] = sendHttpRequestWithDate(link,date)
 
-      log.debug("A single http request has been sent to the server.")
+      log.debug(s"A single http request has been sent to the server. $responseFuture received.")
       log.info("The client is running.")
 
       responseFuture
@@ -86,22 +86,26 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
   }
 
   override def receiveRecover: Receive = {
-    case WorkDoneEvent(pageNumber) => {
-      if(!processedPages.toArray.contains(pageNumber))
+    case WorkDoneEvent(pageNumber) if !processedPages.toArray.contains(pageNumber) => {
       processedPages += pageNumber
-    }
       log.info(s"The messages has been recovered: $pageNumber and processedPages is: $processedPages")
+    }
   }
 
   override val supervisorStrategy : OneForOneStrategy = OneForOneStrategy() {
     case error: Exception => {
-      log.info(s"The master actor has crushed. The error is: $error" )
+      log.info(s"The worker actor has crushed. The error is: $error" )
+      Restart
+    }
+
+    case error @ _ => {
+      log.info(s"The worker has stopped because of an unknown error. The error is: $error")
       Restart
     }
   }
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
-    log.info("The master actor will be restarted.")
+    log.info(s"The master actor will be restarted. Because of error: $reason")
     context.children.foreach { child =>
       context.unwatch(child)
       context.stop(child)
