@@ -11,14 +11,14 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import model.Formatters._
 import model.{InitialResponse, PageResponse}
-import org.apache.logging.log4j.{LogManager, Logger}
+import org.apache.logging.log4j.{LogManager, Logger, Level}
 
 import scala.concurrent.ExecutionContextExecutor
 
 
 object DataProducer extends ProducerConfig with MessageListTrait {
 
-  val log : Logger = LogManager.getLogger(DataProducer)
+  val log = LogManager.getLogger(DataProducer)
 
   def main(args: Array[String]){
 
@@ -37,6 +37,7 @@ object DataProducer extends ProducerConfig with MessageListTrait {
       path("fetcher") {
         parameters('date.as[String],'page.?) { (date, page) =>
           log.info("A message has been received" + page)
+
           if(page.isDefined){
             complete(PageResponse(date, page.get.toInt, myMessageList2))
           } else {

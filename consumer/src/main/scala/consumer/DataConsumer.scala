@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContextExecutor
 
 object DataConsumer extends ConsumerConfig {
 
-  val myData : DateFetcher = DateFetcher(myDate,myLink)
+  val myData : DateFetcher = DateFetcher(dateOfLink,linkForServer)
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val mat : Materializer = ActorMaterializer()

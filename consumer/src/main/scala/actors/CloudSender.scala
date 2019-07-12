@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
 
   val producer: KafkaProducer[String, String] = createKafkaProducer()
-  context.setReceiveTimeout(50000 milliseconds)
+  context.setReceiveTimeout(10000 milliseconds)
 
   override def receive: Receive = {
 
@@ -25,19 +25,17 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
       }
 
 
-      log.info("Cloud sender has sent the values to the cloud. " + pageNumber)
-      log.debug("The sender has finished.")
+      log.info(s"Cloud sender has sent the values to the cloud: $pageNumber")
+      log.debug(s"The sender $pageNumber has finished.")
 
       producer.close()
       sender ! CloudSenderFinished(pageNumber)
-      self ! PoisonPill
     }
 
     case ReceiveTimeout => {
       log.info("The Timeout has been completed. The Actor will be killed now.")
       producer.close()
       context.parent ! PoisonPill
-      self ! PoisonPill
     }
 
     case MessageList(receivedMessage) => {
@@ -46,7 +44,7 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
       }
 
       log.info("Cloud sender has sent the values to the cloud. Processed page is: 0.")
-      log.debug("The sender has finished.")
+      log.debug("The sender 0 has finished.")
 
       producer.close()
       sender ! CloudSenderFinished(0)
