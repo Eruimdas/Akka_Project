@@ -4,15 +4,15 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 import scala.collection.mutable.ArrayBuffer
 
-case class Message(message: String) extends Command
+case class Message(message: String)
 
 case class InitialResponse(date       : String,
                            messageList: List[Message],
-                           pageNumber : Int) extends Command
+                           pageNumber : Int)
 
 case class PageResponse(date        : String,
                         pageNumber  : Int,
-                        messageList : List[Message]) extends Command
+                        messageList : List[Message])
 
 case class DateFetcher(date : String,
                        link : String) extends Command
@@ -20,9 +20,9 @@ case class DateFetcher(date : String,
 case class HistoryFetcher(date       : String,
                           pageNumber : Int,
                           link       : String,
-                          pageList   : ArrayBuffer[Int])  extends Command
+                          pageList   : ArrayBuffer[Int])
 
-case class MessageList (messageList : List[Message]) extends Command
+case class MessageList (messageList : List[Message])
 
 
 case class WorkDoneResponse(pageNumber : Int) extends Command
@@ -30,6 +30,8 @@ case class WorkDoneResponse(pageNumber : Int) extends Command
 case class WorkDoneEvent(pageNumber: Int) extends Event
 
 case class dataToBeSent(messages : List[Message])
+
+case class CloudSenderFinished(pageNumber : Int)
 
 object Formatters extends DefaultJsonProtocol {
   implicit val messageFormat: RootJsonFormat[Message] = jsonFormat1(Message.apply)

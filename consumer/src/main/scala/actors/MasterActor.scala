@@ -8,8 +8,8 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.persistence.PersistentActor
 import akka.routing.RoundRobinPool
-
-import consumer.DataConsumer.{executionContext, mat, consumerConfig, system}
+import consumer.ConsumerConfig
+import consumer.DataConsumer.{executionContext, mat, system}
 import model.Formatters._
 import model._
 
@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class MasterActor extends PersistentActor with ActorLogging {
+class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig {
 
   var  processedPages : ArrayBuffer[Int] = ArrayBuffer[Int]()
 
@@ -51,30 +51,11 @@ class MasterActor extends PersistentActor with ActorLogging {
               }
             }
 
-            else if (status == StatusCodes.BadRequest)
-              system.log.error("A BadRequest Error has been occured please check the server.")
-
-            else if (status == StatusCodes.BadGateway)
-              system.log.error("A BadGateway Error has been occured please check the server.")
-
-            else if (status == StatusCodes.Forbidden)
-              system.log.error("A Forbidden Error has been occured please check the server.")
-
-            else if (status == StatusCodes.InternalServerError)
-              system.log.error("An InternalServerError has been occured please check the server.")
-
-            else if (status == StatusCodes.RequestTimeout)
-              system.log.error("A RequestTimeout Error has been occured please check the server.")
-
-            else if (status == StatusCodes.TooManyRequests)
-              system.log.error("A TooManyRequests Error has been occured please check the server.")
-
             else
-              system.log.error("An error which is not fatal has been occured, please check the server.")
-
+              log.error(s"An error occured while sending the request.Status code is: $status")
           }
           case Failure(_)   =>
-            system.log.error("A Fatal error has ben occured. Please immediately check the server.")
+            log.error("A Fatal error has ben occured. Please immediately check the server.")
         }
     }
 
@@ -138,9 +119,7 @@ class MasterActor extends PersistentActor with ActorLogging {
   override def postRestart(reason: Throwable): Unit = {
     Thread.sleep(500)
     log.info("The master actor has been restarted.")
-    val myDate : String = consumerConfig.getString("consumer.date")
-    val myLink : String = consumerConfig.getString("consumer.link")
-    self ! DateFetcher(myDate.substring(2,myDate.length()),myLink)
+    self ! DateFetcher(myDate,myLink)
     super.postRestart(reason)
   }
 }

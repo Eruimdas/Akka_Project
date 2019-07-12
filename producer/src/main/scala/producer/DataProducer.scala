@@ -11,18 +11,16 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import model.Formatters._
 import model.{InitialResponse, PageResponse}
-import org.apache.logging.log4j.{LogManager, Logger}
+import org.apache.logging.log4j.{LogManager, Logger, Level}
 
 import scala.concurrent.ExecutionContextExecutor
 
 
 object DataProducer extends ProducerConfig with MessageListTrait {
 
-  val log : Logger = LogManager.getLogger("DataProducer")
-
+  val log : Logger = LogManager.getLogger(DataProducer)
 
   def main(args: Array[String]){
-
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -59,7 +57,7 @@ object DataProducer extends ProducerConfig with MessageListTrait {
     val routes: Route = route ~ healthRoute
 
     // `route` will be implicitly converted to `Flow` using `RouteResult.route2HandlerFlow`
-    val bindingFuture = Http().bindAndHandle(routes, myHost.substring(2,myHost.length()), myPort.substring(2,myPort.length()).toInt)
+    val bindingFuture = Http().bindAndHandle(routes, myHost, myPort.toInt)
 
   }
 }

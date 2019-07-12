@@ -3,7 +3,7 @@ package actors
 import java.util.Properties
 
 import akka.actor.{Actor, ActorLogging, PoisonPill, ReceiveTimeout}
-import model.{Message, MessageList, PageResponse}
+import model.{CloudSenderFinished, Message, MessageList, PageResponse}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
 
@@ -29,7 +29,7 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
       log.debug("The sender has finished.")
 
       producer.close()
-      sender ! Message("done")
+      sender ! CloudSenderFinished(pageNumber)
       self ! PoisonPill
     }
 
@@ -45,11 +45,11 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
         sendToCloud(producer,topic,message)
       }
 
-      log.info("Cloud sender has sent the values to the cloud. " + "0")
+      log.info("Cloud sender has sent the values to the cloud. Processed page is: 0.")
       log.debug("The sender has finished.")
 
       producer.close()
-      sender ! Message("done")
+      sender ! CloudSenderFinished(0)
       self ! PoisonPill
     }
   }

@@ -11,21 +11,18 @@ import model._
 
 class WorkerActor extends Actor with ActorLogging{
 
-  var pageNum: Int = 0
-
   val cloudSender: ActorRef = context.actorOf(props = Props(classOf[CloudSender]))
 
   def receive: Receive = {
 
-    case receivedHistory @ HistoryFetcher(date,pageNumber,link,pageList) => {
+    case receivedHistory @ HistoryFetcher(date,pageNum,link,pageList) => {
 
-      pageNum = pageNumber
       //log.info("Message has been received worker: " + pageNum)
       val myPageList = pageList.toArray
 
       if(!myPageList.contains(pageNum)) {
         log.info(s"$pageNum is going to be processed.")
-        Http().singleRequest(HttpRequest(uri = link + date + "&page=" + pageNumber))
+        Http().singleRequest(HttpRequest(uri = link + date + "&page=" + pageNum))
           .flatMap(httpRes => Unmarshal(httpRes.entity).to[PageResponse])
           .map(myVal => cloudSender ! myVal)
           .recover {
@@ -38,21 +35,14 @@ class WorkerActor extends Actor with ActorLogging{
       }
     }
 
-    case Message(responseMessage) =>{
-
-      if(responseMessage.equals("done")) {
-        context.actorSelection("akka://default/user/masterActor") ! WorkDoneResponse(pageNum)
+    case CloudSenderFinished(pageNumber) =>{
+        context.actorSelection("akka://default/user/masterActor") ! WorkDoneResponse(pageNumber)
         log.info("worker has stopped.")
         self ! PoisonPill
-      }
-
-      else {
-        log.warning("Unknown message sent to the WorkerActor from CloudSender")
-      }
     }
 
     case MessageList(messages) => {
-      log.info("Message has been received worker: " + pageNum)
+      log.info("Message has been received worker: 0")
       cloudSender ! messages
     }
   }
