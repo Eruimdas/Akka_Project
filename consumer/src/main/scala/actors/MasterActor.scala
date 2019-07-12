@@ -13,13 +13,12 @@ import consumer.DataConsumer.{executionContext, mat, system}
 import model.Formatters._
 import model._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig {
 
-  var processedPages : ArrayBuffer[Int] = ArrayBuffer[Int]()
+  var processedPages : Set[Int] = Set[Int]()
 
   override def persistenceId: String = "persistentMaster"
 

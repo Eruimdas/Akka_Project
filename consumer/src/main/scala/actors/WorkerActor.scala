@@ -19,9 +19,7 @@ class WorkerActor extends Actor with ActorLogging{
 
     case receivedHistory @ HistoryFetcher(date,pageNum,link,pageList) => {
 
-      val myPageList = pageList.toArray
-
-      if(!myPageList.contains(pageNum)) {
+      if(!pageList.contains(pageNum)) {
         log.info(s"$pageNum is going to be processed.")
 
         sendHttpRequestWithPage(link,date,pageNum.toString)

@@ -20,7 +20,7 @@ case class DateFetcher(date : String,
 case class HistoryFetcher(date       : String,
                           pageNumber : Int,
                           link       : String,
-                          pageList   : ArrayBuffer[Int])
+                          pageList   : Set[Int])
 
 case class MessageList (messageList : List[Message])
 
