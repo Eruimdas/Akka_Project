@@ -119,7 +119,7 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
   override def postRestart(reason: Throwable): Unit = {
     Thread.sleep(500)
     log.info("The master actor has been restarted.")
-    self ! DateFetcher(myDate,myLink)
+    self ! DateFetcher(dateOfLink,linkForServer)
     super.postRestart(reason)
   }
 }

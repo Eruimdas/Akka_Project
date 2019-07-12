@@ -11,7 +11,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import model.Formatters._
 import model.{InitialResponse, PageResponse}
-import org.apache.logging.log4j.{LogManager, Logger, Level}
+import org.apache.logging.log4j.{LogManager, Logger}
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -36,7 +36,7 @@ object DataProducer extends ProducerConfig with MessageListTrait {
     val route:Route =
       path("fetcher") {
         parameters('date.as[String],'page.?) { (date, page) =>
-          system.log.info("A message has been received" + page)
+          log.info("A message has been received" + page)
           if(page.isDefined){
             complete(PageResponse(date, page.get.toInt, myMessageList2))
           } else {
@@ -57,7 +57,7 @@ object DataProducer extends ProducerConfig with MessageListTrait {
     val routes: Route = route ~ healthRoute
 
     // `route` will be implicitly converted to `Flow` using `RouteResult.route2HandlerFlow`
-    val bindingFuture = Http().bindAndHandle(routes, myHost, myPort.toInt)
+    val bindingFuture = Http().bindAndHandle(routes, hostForProducer, portForProcuder.toInt)
 
   }
 }
