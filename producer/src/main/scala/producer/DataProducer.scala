@@ -16,7 +16,7 @@ import org.apache.logging.log4j.{LogManager, Logger}
 import scala.concurrent.ExecutionContextExecutor
 
 
-object DataProducer extends producerConfig with messageListTrait {
+object DataProducer extends ProducerConfig with MessageListTrait {
 
   val log : Logger = LogManager.getLogger("DataProducer")
 

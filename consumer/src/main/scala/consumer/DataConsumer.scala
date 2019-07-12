@@ -8,7 +8,7 @@ import model.DateFetcher
 
 import scala.concurrent.ExecutionContextExecutor
 
-object DataConsumer extends consumerConfig {
+object DataConsumer extends ConsumerConfig {
 
   val myData : DateFetcher = DateFetcher(myDate.substring(2,myDate.length()),myLink)
 

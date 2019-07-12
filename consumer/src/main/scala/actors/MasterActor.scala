@@ -25,9 +25,9 @@ class MasterActor extends PersistentActor with ActorLogging {
 
   override def receiveCommand: Receive = {
 
-    case receivedDate : DateFetcher => {
+    case DateFetcher(date,link) => {
 
-      val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = receivedDate.link + "?date=" + receivedDate.date))
+      val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = link + "?date=" + date))
 
       log.debug("A single http request has been sent to the server.")
       log.info("The client is running.")
@@ -43,7 +43,7 @@ class MasterActor extends PersistentActor with ActorLogging {
                 initialMessageList = response.messageList
               } yield {
                 log.debug("The page number is : " + pageNum)
-                self ! HistoryFetcher(receivedDate.link + "?date=", pageNum, receivedDate.date, processedPages)
+                self ! HistoryFetcher(link + "?date=", pageNum, date, processedPages)
                 Thread.sleep(50)
                 if (!processedPages.toArray.contains(0)) {
                   context.child("workerActors").get ! MessageList(initialMessageList)

@@ -1,22 +1,15 @@
 package actors
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.util.Timeout
 import consumer.DataConsumer.{executionContext, mat, system}
 import model.Formatters._
 import model._
 
-import scala.concurrent.duration.FiniteDuration
-
 class WorkerActor extends Actor with ActorLogging{
-
-  implicit val timeout = Timeout(FiniteDuration(1, TimeUnit.SECONDS))
 
   var pageNum: Int = 0
 
@@ -24,15 +17,15 @@ class WorkerActor extends Actor with ActorLogging{
 
   def receive: Receive = {
 
-    case receivedHistory: HistoryFetcher => {
+    case receivedHistory @ HistoryFetcher(date,pageNumber,link,pageList) => {
 
-      pageNum = receivedHistory.pageNumber
+      pageNum = pageNumber
       //log.info("Message has been received worker: " + pageNum)
-      val myPageList = receivedHistory.pageList.toArray
+      val myPageList = pageList.toArray
 
       if(!myPageList.contains(pageNum)) {
         log.info(s"$pageNum is going to be processed.")
-        Http().singleRequest(HttpRequest(uri = receivedHistory.link + receivedHistory.date + "&page=" + receivedHistory.pageNumber))
+        Http().singleRequest(HttpRequest(uri = link + date + "&page=" + pageNumber))
           .flatMap(httpRes => Unmarshal(httpRes.entity).to[PageResponse])
           .map(myVal => cloudSender ! myVal)
           .recover {
@@ -58,9 +51,9 @@ class WorkerActor extends Actor with ActorLogging{
       }
     }
 
-    case myMessageList: MessageList => {
+    case MessageList(messages) => {
       log.info("Message has been received worker: " + pageNum)
-      cloudSender ! myMessageList
+      cloudSender ! messages
     }
   }
 }

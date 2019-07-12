@@ -3,31 +3,29 @@ package actors
 import java.util.Properties
 
 import akka.actor.{Actor, ActorLogging, PoisonPill, ReceiveTimeout}
-import com.typesafe.config.ConfigFactory
 import model.{Message, MessageList, PageResponse}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
 
 import scala.concurrent.duration._
 
-class CloudSender extends Actor with ActorLogging{
+class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
 
   val producer: KafkaProducer[String, String] = createKafkaProducer()
-  val topic: String = ConfigFactory.load("application.conf").getString("kafka.topic")
   context.setReceiveTimeout(50000 milliseconds)
 
   override def receive: Receive = {
 
-    case receivedPageResponse: PageResponse => {
+    case  PageResponse(date,pageNumber,receivedPageResponse) => {
 
-      log.debug("Message has been received cloud: " + receivedPageResponse.pageNumber)
+      log.debug("Message has been received cloud: " + pageNumber)
 
-      receivedPageResponse.messageList.map { message =>
+      receivedPageResponse.foreach { message =>
         sendToCloud(producer,topic,message)
       }
 
 
-      log.info("Cloud sender has sent the values to the cloud. " + receivedPageResponse.pageNumber)
+      log.info("Cloud sender has sent the values to the cloud. " + pageNumber)
       log.debug("The sender has finished.")
 
       producer.close()
@@ -42,8 +40,8 @@ class CloudSender extends Actor with ActorLogging{
       self ! PoisonPill
     }
 
-    case receivedMessage : MessageList => {
-      receivedMessage.messageList.map { message =>
+    case MessageList(receivedMessage) => {
+      receivedMessage.foreach { message =>
         sendToCloud(producer,topic,message)
       }
 
