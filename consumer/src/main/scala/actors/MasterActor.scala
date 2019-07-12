@@ -38,8 +38,9 @@ class MasterActor extends PersistentActor with ActorLogging {
             if (status == StatusCodes.OK) {
               log.info("The server connection has been made succesfully, and the data has been fetched.")
               for {
-                pageNum <- Unmarshal(entity).to[InitialResponse].map(num => num.pageNumber)
-                initialMessageList <- Unmarshal(entity).to[InitialResponse].map(x => x.messageList)
+                response <- Unmarshal(entity).to[InitialResponse]
+                pageNum = response.pageNumber
+                initialMessageList = response.messageList
               } yield {
                 log.debug("The page number is : " + pageNum)
                 self ! HistoryFetcher(receivedDate.link + "?date=", pageNum, receivedDate.date, processedPages)

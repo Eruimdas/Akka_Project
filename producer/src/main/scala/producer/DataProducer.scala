@@ -9,25 +9,20 @@ import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import com.typesafe.config.{Config, ConfigFactory}
 import model.Formatters._
-import model.{InitialResponse, Message, PageResponse}
+import model.{InitialResponse, PageResponse}
 import org.apache.logging.log4j.{LogManager, Logger}
 
-import scala.collection.immutable._
 import scala.concurrent.ExecutionContextExecutor
 
 
-object DataProducer {
+object DataProducer extends producerConfig with messageListTrait {
 
   val log : Logger = LogManager.getLogger("DataProducer")
 
 
   def main(args: Array[String]){
 
-    val myConfig: Config = ConfigFactory.load()
-    val myPort : String = myConfig.getString("producer.port")
-    val myHost : String = myConfig.getString("producer.host")
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -35,8 +30,6 @@ object DataProducer {
 
     log.debug("System logger has been initialized.")
 
-    val myMessageList1 : List[Message] = List(Message("hasan1"),Message("deneme1"),Message("yasarcan1"))
-    val myMessageList2 : List[Message] = List(Message("hasan"),Message("deneme"),Message("yasarcan"))
     val randomizer = new Random()
     val pageNumber =  200 //randomizer.nextInt(500) + 1
 

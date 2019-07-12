@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 
 class CloudSender extends Actor with ActorLogging{
 
-  val producer = new KafkaProducer[String, String](KafkaProducerConfigs().properties)
+  val producer: KafkaProducer[String, String] = createKafkaProducer()
   val topic: String = ConfigFactory.load("application.conf").getString("kafka.topic")
   context.setReceiveTimeout(50000 milliseconds)
 
@@ -22,9 +22,10 @@ class CloudSender extends Actor with ActorLogging{
 
       log.debug("Message has been received cloud: " + receivedPageResponse.pageNumber)
 
-      receivedPageResponse.messageList.map(_.toString()).map { message =>
-          new ProducerRecord[String, String](topic, message)}
-        .map(myRecord => producer.send(myRecord))
+      receivedPageResponse.messageList.map { message =>
+        sendToCloud(producer,topic,message)
+      }
+
 
       log.info("Cloud sender has sent the values to the cloud. " + receivedPageResponse.pageNumber)
       log.debug("The sender has finished.")
@@ -43,8 +44,7 @@ class CloudSender extends Actor with ActorLogging{
 
     case receivedMessage : MessageList => {
       receivedMessage.messageList.map { message =>
-        val putRecord = new ProducerRecord[String, String](topic, message.toString())
-        producer.send(putRecord)
+        sendToCloud(producer,topic,message)
       }
 
       log.info("Cloud sender has sent the values to the cloud. " + "0")
@@ -61,5 +61,14 @@ class CloudSender extends Actor with ActorLogging{
     properties.put("bootstrap.servers", brokerList)
     properties.put("key.serializer", classOf[StringSerializer])
     properties.put("value.serializer", classOf[StringSerializer])
+  }
+
+  def sendToCloud(producer: KafkaProducer[String, String], topic : String, message: Message): Unit ={
+      val putRecord = new ProducerRecord[String, String](topic, message.toString())
+      producer.send(putRecord)
+  }
+
+  def createKafkaProducer(): KafkaProducer[String , String] ={
+    new KafkaProducer[String, String](KafkaProducerConfigs().properties)
   }
   }
