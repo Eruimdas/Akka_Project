@@ -5,12 +5,13 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import configs.ActorNameTrait
 import consumer.DataConsumer.{executionContext, mat, system}
 import model._
 
 import scala.concurrent.Future
 
-class WorkerActor extends Actor with ActorLogging{
+class WorkerActor extends Actor with ActorLogging with ActorNameTrait{
 
   val cloudSender: ActorRef = context.actorOf(props = Props(classOf[CloudSender]))
 
@@ -35,7 +36,7 @@ class WorkerActor extends Actor with ActorLogging{
     }
 
     case CloudSenderFinished(pageNumber) =>{
-        context.actorSelection("akka://default/user/masterActor") ! WorkDoneResponse(pageNumber)
+        context.actorSelection(s"akka://default/user/$masterName") ! WorkDoneResponse(pageNumber)
         log.info(s"worker $pageNumber has stopped.")
         self ! PoisonPill
     }

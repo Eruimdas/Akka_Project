@@ -43,11 +43,11 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
     case HistoryFetcher(date,pageNumber,link, historyPages, messageList) => {
 
       val workerActors = context.actorOf(props = RoundRobinPool(pageNumber+1)
-        .props(Props(classOf[WorkerActor])), "workerActors")
+        .props(Props(classOf[WorkerActor])))
       context.watch(workerActors)
 
       if (!processedPages.contains(0)) {
-        context.child("workerActors").get ! MessageList(messageList)
+        workerActors ! MessageList(messageList)
       }
 
       (1 to pageNumber).foreach { page =>
