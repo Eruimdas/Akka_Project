@@ -6,7 +6,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import consumer.DataConsumer.{executionContext, mat, system}
-import model.Formatters._
 import model._
 
 import scala.concurrent.Future
@@ -17,7 +16,7 @@ class WorkerActor extends Actor with ActorLogging{
 
   def receive: Receive = {
 
-    case receivedHistory @ HistoryFetcher(date,pageNum,link,pageList) => {
+    case receivedHistory @ HistoryFetcher(date,pageNum,link,pageList,messageList) => {
 
       if(!pageList.contains(pageNum)) {
         log.info(s"$pageNum is going to be processed.")
@@ -27,7 +26,7 @@ class WorkerActor extends Actor with ActorLogging{
           .map(myVal => cloudSender ! myVal)
           .recover {
             case error: Throwable => {
-              log.error(s"There's an error while sending the request: $pageNum")
+              log.error(s"There's an error while sending the request: $pageNum the error is: $error")
               Thread.sleep(25)
               self ! receivedHistory
             }

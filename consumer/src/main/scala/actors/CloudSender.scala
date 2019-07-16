@@ -3,6 +3,7 @@ package actors
 import java.util.Properties
 
 import akka.actor.{Actor, ActorLogging, PoisonPill, ReceiveTimeout}
+import configs.CloudSenderTrait
 import model.{CloudSenderFinished, Message, MessageList, PageResponse}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
@@ -52,7 +53,7 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
     }
   }
 
-  case class KafkaProducerConfigs(brokerList: String = "localhost:9092") {
+  case class KafkaProducerConfigs(brokerList: String = "localhost:9092")  {
     val properties = new Properties()
     properties.put("bootstrap.servers", brokerList)
     properties.put("key.serializer", classOf[StringSerializer])
@@ -64,7 +65,10 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
       producer.send(putRecord)
   }
 
-  def createKafkaProducer(): KafkaProducer[String , String] ={
+  def createKafkaProducer(): KafkaProducer[String , String] =
     new KafkaProducer[String, String](KafkaProducerConfigs().properties)
-  }
-  }
+
+
+}
+
+

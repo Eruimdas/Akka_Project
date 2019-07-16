@@ -1,4 +1,4 @@
-package actors
+package configs
 
 import com.typesafe.config.ConfigFactory
 

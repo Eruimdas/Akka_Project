@@ -1,4 +1,4 @@
-package producer
+package configs
 
 import com.typesafe.config.{Config, ConfigFactory}
 

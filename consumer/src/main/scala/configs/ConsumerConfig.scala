@@ -1,4 +1,4 @@
-package consumer
+package configs
 
 import com.typesafe.config.{Config, ConfigFactory}
 

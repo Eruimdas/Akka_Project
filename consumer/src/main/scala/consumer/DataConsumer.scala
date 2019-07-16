@@ -3,6 +3,7 @@ package consumer
 import actors.MasterActor
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.stream.{ActorMaterializer, Materializer}
+import configs.ConsumerConfig
 import model.DateFetcher
 
 import scala.concurrent.ExecutionContextExecutor

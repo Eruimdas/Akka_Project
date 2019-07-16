@@ -9,9 +9,9 @@ import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import model.Formatters._
+import configs.{MessageListTrait, ProducerConfig}
 import model.{InitialResponse, PageResponse}
-import org.apache.logging.log4j.{LogManager, Logger, Level}
+import org.apache.logging.log4j.LogManager
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -38,11 +38,10 @@ object DataProducer extends ProducerConfig with MessageListTrait {
         parameters('date.as[String],'page.?) { (date, page) =>
           log.info("A message has been received" + page)
 
-          if(page.isDefined){
-            complete(PageResponse(date, page.get.toInt, myMessageList2))
-          } else {
-            complete(InitialResponse(date, myMessageList1, pageNumber))
+          page.fold(complete(InitialResponse(date, dummyMessageList1, pageNumber))){ page =>
+            complete(PageResponse(date, page.toInt, dummyMessageList2))
           }
+
         }
       }
 
