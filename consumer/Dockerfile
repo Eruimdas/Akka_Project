@@ -5,4 +5,5 @@ ENV DATE_FOR_LINK = "20190614"
 ENV KAFKA_TOPIC = "test"
 ENV LINK_FOR_SERVER = "http://localhost:8080/fetcher"
 ENV MASTER_ACTOR_NAME = "masterActor"
+ENV MAX_OPEN_REQUESTS = 2048
 ENTRYPOINT java -jar consumer.jar

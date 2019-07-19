@@ -14,7 +14,6 @@ import model._
 
 import scala.concurrent.Future
 
-
 class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig {
 
   var processedPages : Set[Int] = Set[Int]()
@@ -27,23 +26,23 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
 
       val responseFuture: Future[HttpResponse] = sendHttpRequestWithDate(link,date)
 
-      log.debug(s"A single http request has been sent to the server for the link: DATE")
+      log.debug(s"A http request sent to server for date: $date to get page number.")
 
-      responseFuture.map{response =>
+      responseFuture.map { response =>
         if (response.status == StatusCodes.OK) {
           log.info("The server connection has been made succesfully, and the data has been fetched.")
           workerActorCreator(response.entity, theDate)
         } else {
-          log.error("An error occured while sending the request.Status code is:" + response.status)
+          log.error(s"An error occured while sending the request.Status code is: ${response.status}")
         }
       }.recover { case error => log.error(s"Please check the server. The error is: $error") }
-
     }
 
-    case HistoryFetcher(date,pageNumber,link, historyPages, messageList) => {
+    case HistoryFetcher(date, pageNumber, link, historyPages, messageList) => {
 
       val workerActors = context.actorOf(props = RoundRobinPool(pageNumber+1)
-        .props(Props(classOf[WorkerActor])))
+       .props(Props(classOf[WorkerActor])),"workerActors")
+
       context.watch(workerActors)
 
       if (!processedPages.contains(0)) {
@@ -63,7 +62,7 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
       system.terminate()
     }
 
-    case WorkDoneResponse(pageNumber) => persist(WorkDoneEvent(pageNumber)){ event =>
+    case WorkDoneResponse(pageNumber) => persist(WorkDoneEvent(pageNumber)) { event =>
       processedPages += pageNumber
       log.info(s"The new pages list is $processedPages")
     }
@@ -71,7 +70,7 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
   }
 
   override def receiveRecover: Receive = {
-    case WorkDoneEvent(pageNumber) if !processedPages.toArray.contains(pageNumber) => {
+    case WorkDoneEvent(pageNumber) if !processedPages.contains(pageNumber) => {
       processedPages += pageNumber
       log.info(s"The messages has been recovered: $pageNumber and processedPages is: $processedPages")
     }
@@ -95,23 +94,23 @@ class MasterActor extends PersistentActor with ActorLogging with ConsumerConfig 
       context.unwatch(child)
       context.stop(child)
     }
-    super.preRestart(reason,message)
+    super.preRestart(reason, message)
   }
 
   override def postRestart(reason: Throwable): Unit = {
     Thread.sleep(500)
     log.info(s"The master actor has been restarted because of an error: $reason")
-    self ! DateFetcher(dateOfLink,linkForServer)
+    self ! DateFetcher(dateOfLink, linkForServer)
     super.postRestart(reason)
   }
 
   def sendHttpRequestWithDate(link: String,date: String): Future[HttpResponse] = {
-   Http().singleRequest(HttpRequest(uri = link + "?date=" + date))
+   Http().singleRequest(HttpRequest(uri =s"$link?date=$date"))
   }
 
   def workerActorCreator(askedEntity: ResponseEntity, theDateFetcher: DateFetcher): Unit =
     Unmarshal(askedEntity).to[InitialResponse].foreach { response =>
-      log.debug("The page number is : " + response.pageNumber)
+      log.debug(s"The page number is : ${response.pageNumber}")
       self ! HistoryFetcher(theDateFetcher.link + "?date=", response.pageNumber,
         theDateFetcher.date, processedPages, response.messageList)
     }

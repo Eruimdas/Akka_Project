@@ -17,14 +17,13 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
 
   override def receive: Receive = {
 
-    case  PageResponse(date,pageNumber,receivedPageResponse) => {
+    case  PageResponse(_, pageNumber, messageList) => {
 
-      log.debug("Message has been received cloud: " + pageNumber)
+      log.debug(s"Message has been received cloud: $pageNumber")
 
-      receivedPageResponse.foreach { message =>
+      messageList.foreach { message =>
         sendToCloud(producer,topic,message)
       }
-
 
       log.info(s"Cloud sender has sent the values to the cloud: $pageNumber")
       log.debug(s"The sender $pageNumber has finished.")
@@ -39,10 +38,9 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
       context.parent ! PoisonPill
     }
 
-    case MessageList(receivedMessage) => {
+    case MessageList(receivedMessage) =>
       receivedMessage.foreach { message =>
         sendToCloud(producer,topic,message)
-      }
 
       log.info("Cloud sender has sent the values to the cloud. Processed page is: 0.")
       log.debug("The sender 0 has finished.")
@@ -60,7 +58,7 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
     properties.put("value.serializer", classOf[StringSerializer])
   }
 
-  def sendToCloud(producer: KafkaProducer[String, String], topic : String, message: Message): Unit ={
+  def sendToCloud(producer: KafkaProducer[String, String], topic : String, message: Message): Unit = {
       val putRecord = new ProducerRecord[String, String](topic, message.toString())
       producer.send(putRecord)
   }
@@ -68,7 +66,4 @@ class CloudSender extends Actor with ActorLogging with CloudSenderTrait {
   def createKafkaProducer(): KafkaProducer[String , String] =
     new KafkaProducer[String, String](KafkaProducerConfigs().properties)
 
-
 }
-
-

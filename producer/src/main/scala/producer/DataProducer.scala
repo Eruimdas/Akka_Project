@@ -11,14 +11,14 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import configs.{MessageListTrait, ProducerConfig}
 import model.{InitialResponse, PageResponse}
-import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.{LogManager, Logger}
 
 import scala.concurrent.ExecutionContextExecutor
 
 
 object DataProducer extends ProducerConfig with MessageListTrait {
 
-  val log = LogManager.getLogger(DataProducer)
+  val log: Logger = LogManager.getLogger(DataProducer)
 
   def main(args: Array[String]){
 
@@ -29,14 +29,14 @@ object DataProducer extends ProducerConfig with MessageListTrait {
     log.debug("System logger has been initialized.")
 
     val randomizer = new Random()
-    val pageNumber =  700 //randomizer.nextInt(500) + 1
+    val pageNumber =  500 //randomizer.nextInt(500) + 1
 
-    log.info("randomized value is : " + pageNumber)
+    log.info(s"randomized value is : $pageNumber")
 
     val route:Route =
       path("fetcher") {
         parameters('date.as[String],'page.?) { (date, page) =>
-          log.info("A message has been received" + page)
+          log.info(s"A message has been received: $page")
 
           page.fold(complete(InitialResponse(date, dummyMessageList1, pageNumber))){ page =>
             complete(PageResponse(date, page.toInt, dummyMessageList2))
