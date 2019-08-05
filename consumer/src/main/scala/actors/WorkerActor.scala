@@ -5,6 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.Source
 import configs.ActorNameTrait
 import consumer.DataConsumer.{executionContext, mat, system}
 import model._
@@ -18,7 +19,7 @@ class WorkerActor extends Actor with ActorLogging with ActorNameTrait {
   def receive: Receive = {
 
     case receivedHistory @ HistoryFetcher(date, pageNum, link, pageList, _) =>
-
+      Source
       if(!pageList.contains(pageNum)) {
         log.info(s"$pageNum is going to be processed.")
 

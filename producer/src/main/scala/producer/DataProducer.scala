@@ -15,7 +15,6 @@ import org.apache.logging.log4j.{LogManager, Logger}
 
 import scala.concurrent.ExecutionContextExecutor
 
-
 object DataProducer extends ProducerConfig with MessageListTrait {
 
   val log: Logger = LogManager.getLogger(DataProducer)
@@ -29,7 +28,7 @@ object DataProducer extends ProducerConfig with MessageListTrait {
     log.debug("System logger has been initialized.")
 
     val randomizer = new Random()
-    val pageNumber = randomizer.nextInt(500) + 1
+    val pageNumber = 3 // randomizer.nextInt(500) + 1
 
     log.info(s"randomized value is : $pageNumber")
 
@@ -41,7 +40,6 @@ object DataProducer extends ProducerConfig with MessageListTrait {
           page.fold(complete(InitialResponse(date, dummyMessageList1, pageNumber))){ page =>
             complete(PageResponse(date, page.toInt, dummyMessageList2))
           }
-
         }
       }
 
@@ -58,6 +56,5 @@ object DataProducer extends ProducerConfig with MessageListTrait {
 
     // `route` will be implicitly converted to `Flow` using `RouteResult.route2HandlerFlow`
     val bindingFuture = Http().bindAndHandle(routes, hostForProducer, portForProcuder.toInt)
-
   }
 }

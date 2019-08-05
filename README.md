@@ -27,4 +27,4 @@ docker build -t consumer:$tag .
 ```
 docker run --network="host" --name theConsumer consumer:$tag
 ```
-- For any changes in the server, add `-e DATE_FOR_LINK = $newDate` and `-e DIR_FOR_PERSISTENCE = $newDirectory` to docker run command.
+- For any changes in the server, add `-e DATE_FOR_LINK = $newDate` to docker run command.
