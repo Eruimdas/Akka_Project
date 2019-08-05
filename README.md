@@ -1,5 +1,7 @@
 ## How to build
 
+##### Akka Streams solution for the same process is on develop branch.
+
 ### Kafka Server
 
 - Use `docker-compose up -d` for docker-compose.yml, to create kafka server. Edit `KAFKA_ADVERTISED_LISTENERS` and `KAFKA_LISTENERS` for port changes and `KAFKA_CREATE_TOPICS` for topics.
