@@ -28,8 +28,6 @@ object DataConsumer extends ConsumerConfig with ActorNameTrait with CloudSenderT
   implicit val mat : Materializer = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  var processedPages : Set[Int] = Set[Int]()
-
   private val producer = createKafkaProducer()
 
   def main(args: Array[String]): Unit = {
@@ -76,10 +74,7 @@ object DataConsumer extends ConsumerConfig with ActorNameTrait with CloudSenderT
   def fetchPageNumber(firstPageResponse : HttpResponse): Future[Int] = {
     log.debug(s"The second response code is: ${firstPageResponse.status}")
     unmarshalToInitialResponse(firstPageResponse.entity).map { initialResponse =>
-      if (!processedPages.contains(0)){
         initialResponse.messageList.foreach( message => sendToCloud(producer, topic, message))
-        processedPages += 0
-      }
       log.debug(s"${initialResponse.pageNumber}")
       initialResponse.pageNumber
     }
@@ -87,17 +82,12 @@ object DataConsumer extends ConsumerConfig with ActorNameTrait with CloudSenderT
 
   def fetchPageData(pageNumber : Int): Unit = {
     Source(1 to pageNumber).map { pageNum =>
-      if (!processedPages.contains(pageNum)){
       sendHttpRequestWithPage(linkForServer, dateOfLink, pageNum).map { receivedRequest =>
         log.debug(s"${receivedRequest.status}")
         unmarshalToPageResponse(receivedRequest.entity).map { innerPageResponse =>
           innerPageResponse.messageList.foreach(message => sendToCloud(producer, topic, message))
           log.debug(s"${innerPageResponse.messageList}")
         }
-        }
-        log.info(s"$processedPages")
-
-        processedPages += pageNum
       }
     }
   }
