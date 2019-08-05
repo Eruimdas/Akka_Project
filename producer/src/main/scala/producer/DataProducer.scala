@@ -29,7 +29,7 @@ object DataProducer extends ProducerConfig with MessageListTrait {
     log.debug("System logger has been initialized.")
 
     val randomizer = new Random()
-    val pageNumber =  500 //randomizer.nextInt(500) + 1
+    val pageNumber = randomizer.nextInt(500) + 1
 
     log.info(s"randomized value is : $pageNumber")
 
